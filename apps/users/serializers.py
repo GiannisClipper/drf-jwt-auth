@@ -4,6 +4,37 @@ from django.contrib.auth import authenticate
 from .models import User
 
 
+def authenticated_user(data):
+    """Authentication process."""
+
+    username = data.get('username', None)
+    password = data.get('password', None)
+
+    if username is None:
+        raise serializers.ValidationError(
+            'A username is required to log in.'
+        )
+
+    if password is None:
+        raise serializers.ValidationError(
+            'A password is required to log in.'
+        )
+
+    user = authenticate(username=username, password=password)
+
+    if user is None:
+        raise serializers.ValidationError(
+            'A user with this username and password was not found.'
+        )
+
+    if not user.is_active:
+        raise serializers.ValidationError(
+            'This user has been deactivated.'
+        )
+
+    return user
+
+
 class SignupSerializer(serializers.ModelSerializer):
     """Requests and creates a new user."""
 
@@ -29,37 +60,14 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class SigninSerializer(serializers.Serializer):
     """Authenticates a user & creates a token"""
-
+    
     email = serializers.CharField(max_length=255, read_only=True)
     username = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
-        username = data.get('username', None)
-        password = data.get('password', None)
-
-        if username is None:
-            raise serializers.ValidationError(
-                'A username is required to log in.'
-            )
-
-        if password is None:
-            raise serializers.ValidationError(
-                'A password is required to log in.'
-            )
-
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            raise serializers.ValidationError(
-                'A user with this email and password was not found.'
-            )
-
-        if not user.is_active:
-            raise serializers.ValidationError(
-                'This user has been deactivated.'
-            )
+        user = authenticated_user(data)
 
         return {
             'username': user.username,
@@ -79,12 +87,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password', 'token',)
+        fields = ('username', 'password', 'email', 'token',)
 
         # Alternative to read_only=True, prefered
         # cause don't want to specify anything else
         read_only_fields = ('token',)
-
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
@@ -98,3 +105,9 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def delete(self):
+        user = authenticated_user(self.initial_data)
+        user.delete()
+
+        return None

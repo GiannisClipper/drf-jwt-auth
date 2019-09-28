@@ -36,7 +36,7 @@ class SigninAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UpdateCurrentUserAPIView(RetrieveUpdateAPIView):
+class CurrentUserAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     renderer_classes = (UserJSONRenderer,)
@@ -56,3 +56,11 @@ class UpdateCurrentUserAPIView(RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        serializer_data = request.data.get('user', {})
+
+        serializer = self.serializer_class(request.user, data=serializer_data)
+        serializer.delete()
+
+        return Response({}, status=status.HTTP_200_OK)

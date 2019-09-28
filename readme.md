@@ -115,7 +115,7 @@ cd projectname
     \"email\":\"test@email.net\"}}
     
 
-    - (response) {"user": {"email": "test@email.net", "username": "john",
+    - (response) {"user": {"username": "john", "email": "test@email.net",
 
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
 
@@ -131,7 +131,7 @@ cd projectname
     -d {\"user\":{\"username\":\"john\",\"password\":\"12345678\"}}
 
 
-    - (response) {"user": {"email": "test@email.net", "username": "john", 
+    - (response) {"user": {"username": "john", "email": "test@email.net",
     
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
     
@@ -140,7 +140,27 @@ cd projectname
     vjQvyVQmwwDWBMqHfudUwxmaTkL3Lm2b45CJlQfG_v0"}}
 
 
-    - (venv) ...apps> curl -X POST http://localhost:8000/users/update_current/
+    - (venv) ...apps> curl -X GET http://localhost:8000/users/current/
+    
+    -H "Content-Type: application/json" 
+    
+    -H "Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9. 
+
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjY0MC40NjMxODJ9.
+    
+    vjQvyVQmwwDWBMqHfudUwxmaTkL3Lm2b45CJlQfG_v0"
+    
+
+    - (response) {"user": {"username": "john", "email": "test@email.net",
+    
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
+    
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjU5Ni40NDA4MTd9.
+    
+    ms__6F5WdofIlHTgP9I2pJFg-60n1hPQNwWYJhYj05A"}}
+
+
+    - (venv) ...apps> curl -X PATCH http://localhost:8000/users/current/
     
     -H "Content-Type: application/json" 
     
@@ -153,10 +173,26 @@ cd projectname
     -d {\"user\":{\"username\":\"john\",\"email\":\"modified@email.net\"}}
     
 
-    - (response) {"user": {"email": "modified@email.net", "username": "john", 
+    - (response) {"user": {"username": "john", "email": "modified@email.net",
     
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
     
     eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjU5Ni40NDA4MTd9.
     
     ms__6F5WdofIlHTgP9I2pJFg-60n1hPQNwWYJhYj05A"}}
+
+
+    - (venv) ...apps> curl -X DELETE http://localhost:8000/users/current/
+    
+    -H "Content-Type: application/json" 
+    
+    -H "Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9. 
+
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjY0MC40NjMxODJ9.
+    
+    vjQvyVQmwwDWBMqHfudUwxmaTkL3Lm2b45CJlQfG_v0"
+    
+    -d {\"user\":{\"username\":\"john\",\"password\":\"12345678\"}}
+    
+
+    - (response) {"user": {}}
