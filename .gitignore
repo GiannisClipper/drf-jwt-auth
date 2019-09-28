@@ -1,0 +1,7 @@
+# Git ignores following folders and files
+
+apps/db.sqlite3
+**/migrations
+**/__pycache__
+
+venv/
