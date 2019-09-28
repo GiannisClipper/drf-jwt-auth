@@ -1,4 +1,4 @@
-An implementation of DjangoRestFramework authentication with JSON Web Tokens authentication. Althought modified, is based on this very good tutorial https://thinkster.io/tutorials/django-json-api/authentication
+An implementation of DjangoRestFramework authentication with JSON Web Tokens. Althought modified, is based on this very good tutorial https://thinkster.io/tutorials/django-json-api/authentication
 
 
 md projectname
