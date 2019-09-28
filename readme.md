@@ -104,9 +104,9 @@ cd projectname
     (shell_plus automatically imports all models from apps in INSTALLED_APPS)
 
 
-- Post request with curl
+- Requests with curl
 
-    (venv) ...apps>curl -X POST http://localhost:8000/users/signup
+    - (venv) ...apps> curl -X POST http://localhost:8000/users/signup/
 
     -H "Content-Type: application/json"
 
@@ -115,10 +115,48 @@ cd projectname
     \"email\":\"test@email.net\"}}
     
 
-    (response){"user": {"email": "test@email.net", "username": "john",
+    - (response) {"user": {"email": "test@email.net", "username": "john",
 
-     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
 
-     eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY2MTY5MS45NDI4ODd9.
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY2MTY5MS45NDI4ODd9.
 
-     mKg17j9ohqngz5FTME1s5__YjVuHRTpezG_Ox6eVPsk"}}
+    mKg17j9ohqngz5FTME1s5__YjVuHRTpezG_Ox6eVPsk"}}
+
+
+    - (venv) ...apps> curl -X POST http://localhost:8000/users/signin/ 
+     
+    -H "Content-Type: application/json" 
+     
+    -d {\"user\":{\"username\":\"john\",\"password\":\"12345678\"}}
+
+
+    - (response) {"user": {"email": "test@email.net", "username": "john", 
+    
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
+    
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjY0MC40NjMxODJ9.
+    
+    vjQvyVQmwwDWBMqHfudUwxmaTkL3Lm2b45CJlQfG_v0"}}
+
+
+    - (venv) ...apps> curl -X POST http://localhost:8000/users/update_current/
+    
+    -H "Content-Type: application/json" 
+    
+    -H "Authorization: Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9. 
+
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjY0MC40NjMxODJ9.
+    
+    vjQvyVQmwwDWBMqHfudUwxmaTkL3Lm2b45CJlQfG_v0"
+    
+    -d {\"user\":{\"username\":\"john\",\"email\":\"modified@email.net\"}}
+    
+
+    - (response) {"user": {"email": "modified@email.net", "username": "john", 
+    
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
+    
+    eyJpZCI6MiwiZXhwaXJhdGlvbiI6MTU2OTY3MjU5Ni40NDA4MTd9.
+    
+    ms__6F5WdofIlHTgP9I2pJFg-60n1hPQNwWYJhYj05A"}}
