@@ -5,3 +5,5 @@ apps/db.sqlite3
 **/__pycache__
 
 venv/
+
+Setting up JWT Authentication**
