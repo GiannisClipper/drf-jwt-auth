@@ -35,8 +35,8 @@ from .views import root
 urlpatterns = [
 #    path('debug/', debug),
 
-    path('', root),
-    path('users/', include('users.urls', namespace='authentication')),
+    path('', root, name='root'),
+    path('users/', include('users.urls', namespace='users')),
 
     # path('admin/', admin.site.urls),
 ]

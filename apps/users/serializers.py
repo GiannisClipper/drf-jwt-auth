@@ -61,9 +61,9 @@ class SignupSerializer(serializers.ModelSerializer):
 class SigninSerializer(serializers.Serializer):
     """Authenticates a user & creates a token"""
     
-    email = serializers.CharField(max_length=255, read_only=True)
     username = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
+    email = serializers.CharField(max_length=255, read_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
@@ -76,7 +76,7 @@ class SigninSerializer(serializers.Serializer):
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     """Handles serialization and deserialization of User objects."""
 
     password = serializers.CharField(
@@ -85,13 +85,19 @@ class UserSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    url = serializers.HyperlinkedIdentityField(
+        view_name='users:byid',
+        lookup_field='id',
+        read_only=True, 
+    )
+
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'token',)
+        fields = ('username', 'password', 'email', 'url',)
 
         # Alternative to read_only=True, prefered
         # cause don't want to specify anything else
-        read_only_fields = ('token',)
+        # read_only_fields = ('token',)
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)

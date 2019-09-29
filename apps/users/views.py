@@ -1,11 +1,15 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
+from django.shortcuts import get_object_or_404
+
+from .models import User
 from .serializers import SignupSerializer, SigninSerializer, UserSerializer
 from .renderers import UserJSONRenderer
+
 
 class SignupAPIView(APIView):
     permission_classes = (AllowAny,)
@@ -36,21 +40,33 @@ class SigninAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CurrentUserAPIView(RetrieveUpdateAPIView):
+class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     renderer_classes = (UserJSONRenderer,)
 
-    def retrieve(self, request, *args, **kwargs):
-        serializer = self.serializer_class(request.user)
+    def get_user(self, request):
+        return request.user
 
+    def retrieve(self, request, *args, **kwargs):
+        user = self.get_user(request)
+
+        serializer = self.serializer_class(
+            user, 
+            context={'request': request}  # required by url field
+        )  
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        serializer_data = request.data.get('user', {})
+        user = self.get_user(request)
+        data = request.data.get('user', {})
 
         serializer = self.serializer_class(
-            request.user, data=serializer_data, partial=True
+            user, 
+            data=data, 
+            partial=True,
+            context={'request': request}  # required by url field
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -58,9 +74,19 @@ class CurrentUserAPIView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-        serializer_data = request.data.get('user', {})
+        user = self.get_user(request)
+        data = request.data.get('user', {})
 
-        serializer = self.serializer_class(request.user, data=serializer_data)
+        serializer = self.serializer_class(user, data=data)
         serializer.delete()
 
         return Response({}, status=status.HTTP_200_OK)
+
+
+class UserByIdAPIView(CurrentUserAPIView):
+    permission_classes = (IsAdminUser,)
+    serializer_class = UserSerializer
+    renderer_classes = (UserJSONRenderer,)
+
+    def get_user(self, request):
+        return get_object_or_404(User, pk=self.kwargs['id'])
