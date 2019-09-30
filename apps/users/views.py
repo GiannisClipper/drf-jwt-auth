@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView
 
 from django.shortcuts import get_object_or_404
 
@@ -45,11 +45,11 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     renderer_classes = (UserJSONRenderer,)
 
-    def get_user(self, request):
+    def get_queryset(self, request):
         return request.user
 
     def retrieve(self, request, *args, **kwargs):
-        user = self.get_user(request)
+        user = self.get_queryset(request)
 
         serializer = self.serializer_class(
             user, 
@@ -59,7 +59,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        user = self.get_user(request)
+        user = self.get_queryset(request)
         data = request.data.get('user', {})
 
         serializer = self.serializer_class(
@@ -74,7 +74,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-        user = self.get_user(request)
+        user = self.get_queryset(request)
         data = request.data.get('user', {})
 
         serializer = self.serializer_class(user, data=data)
@@ -88,5 +88,49 @@ class UserByIdAPIView(CurrentUserAPIView):
     serializer_class = UserSerializer
     renderer_classes = (UserJSONRenderer,)
 
-    def get_user(self, request):
+    def get_queryset(self, request):
         return get_object_or_404(User, pk=self.kwargs['id'])
+
+
+class UsersListAPIView(RetrieveAPIView):
+    permission_classes = (IsAdminUser,)
+    serializer_class = UserSerializer
+    # renderer_classes = (UserJSONRenderer,)
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        serializer = self.serializer_class(
+            queryset,
+            many=True,
+            context={'request': request}  # required by url field
+        )  
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AdminUsersListAPIView(UsersListAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True)
+
+
+class NoAdminUsersListAPIView(UsersListAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=False)
+
+
+class ActiveUsersListAPIView(UsersListAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=True)
+
+
+class NoActiveUsersListAPIView(UsersListAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=False)
