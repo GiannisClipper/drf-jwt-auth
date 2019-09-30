@@ -1,7 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import (
-    AbstractBaseUser, BaseUserManager, PermissionsMixin
+    AbstractBaseUser, 
+    BaseUserManager, 
+    PermissionsMixin,
 )
 
 import jwt #pip install pyjwt
@@ -16,7 +18,7 @@ class UserManager(BaseUserManager):
     """
 
     def create_user(self, username, email, password=None):
-        """Create and return a User with an email, username and password."""
+        """Create and return a user."""
 
         if username is None:
             raise TypeError('Users must have a username.')
@@ -31,7 +33,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password):
-        """Create and return a User with superuser/admin permissions."""
+        """Create and return a user with superuser/admin permissions."""
 
         if password is None:
             raise TypeError('Superusers must have a password.')
@@ -45,6 +47,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """Custom user model."""
+
     username = models.CharField(db_index=True, max_length=255, unique=True)
     email = models.EmailField(db_index=True, unique=True)
 
@@ -63,20 +67,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-    @property
+    @property  # Decorator @property defines a dynamic property
     def token(self):
-        """
-        toke() is called dynamic property, user.token() used instead 
-        of user.generate_jwt_token(), @property makes this possible.
-        """
+        """Dynamic property to generate a JSON Web Token."""
 
         return self._generate_jwt_token()
 
     def _generate_jwt_token(self):
-        """Generates a JSON Web Token with user info and expiry date"""
+        """Generates a JSON Web Token with user info and expiry date."""
 
-        timestamp = datetime.timestamp(datetime.utcnow())
-        expiration = timestamp + (60 * 60)  # 1 hour (3600 seconds)
+        now = datetime.timestamp(datetime.utcnow())
+        expiration = now + (60 * 60)  # 1 hour (3600 seconds)
 
         token = jwt.encode({
             'id': self.pk,

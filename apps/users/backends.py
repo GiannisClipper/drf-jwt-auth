@@ -1,6 +1,8 @@
-import jwt
 from django.conf import settings
 from rest_framework import authentication, exceptions
+
+import jwt #pip install pyjwt
+from datetime import datetime
 
 from .models import User
 
@@ -19,7 +21,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         if len(auth_header) != 2:
             return None
 
-        # Prefix and token have to be docoded,
+        # Prefix & token have to be docoded, 
         # cause JWT library can't handle the byte type
         prefix = auth_header[0].decode('utf-8')
         token = auth_header[1].decode('utf-8')
@@ -44,6 +46,12 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
         if not user.is_active:
             msg = 'This user has been deactivated.'
+            raise exceptions.AuthenticationFailed(msg)
+
+        now = datetime.timestamp(datetime.utcnow())
+        expiration = now + (60 * 60)  # 1 hour (3600 seconds)
+        if payload['expiration'] + (60 * 60) < now:
+            msg = 'Authentication token has been expired.'
             raise exceptions.AuthenticationFailed(msg)
 
         return (user, token)
