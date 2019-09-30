@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from .models import User
 from .serializers import SignupSerializer, SigninSerializer, UserSerializer
-from .renderers import UserJSONRenderer
+from .renderers import UserJSONRenderer, UsersJSONRenderer
 
 
 class SignupAPIView(APIView):
@@ -95,7 +95,7 @@ class UserByIdAPIView(CurrentUserAPIView):
 class UsersListAPIView(RetrieveAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = UserSerializer
-    # renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (UsersJSONRenderer,)
 
     def get_queryset(self):
         return User.objects.all()
